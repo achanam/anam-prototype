@@ -1,0 +1,17 @@
+{
+  "name": "Ach Anam Prototype",
+  "short_name": "AnamAch",
+  "description": "Prototype Kalender & Jadwal Sholat by Ach Anam",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#141517",
+  "theme_color": "#B4FF39",
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

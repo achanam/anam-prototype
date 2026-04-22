@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prototype Ach Anam</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+  
+ #holiday-text {
+    text-shadow: 0 0 10px rgba(255, 68, 68, 0.4); /* Efek neon merah */
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    transition: all 0.3s ease;
+    display: block;
+    min-height: 1.2rem; /* Jaga space biar gak lompat-lompat layoutnya */
+}
+
+/* Biar angka aktif di tanggal merah tetep kontras */
+.num-day.active {
+    box-shadow: 0 0 15px rgba(180, 255, 57, 0.5);
+}
+
+ #splash-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #121212; /* Warna item pekat biar kontras sama ijo */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999; /* Biar paling depan */
+    transition: opacity 0.8s ease, visibility 0.8s;
+}
+
+.splash-content {
+    text-align: center;
+}
+
+.splash-logo {
+    color: #fff;
+    font-size: 2rem;
+    font-weight: 900;
+    letter-spacing: 5px;
+    margin-bottom: 10px;
+}
+
+.splash-logo span {
+    color: #B4FF39; /* Aksen ijo andalan lo */
+}
+
+.splash-content p {
+    color: #666;
+    font-size: 0.8rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
+/* Animasi Loading Bar Tipis */
+.loading-bar {
+    width: 100px;
+    height: 2px;
+    background: #333;
+    margin: 20px auto;
+    position: relative;
+    overflow: hidden;
+}
+
+.loading-bar::after {
+    content: '';
+    position: absolute;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: #B4FF39;
+    animation: loading 2s infinite;
+}
+
+@keyframes loading {
+    0% { left: -100%; }
+    100% { left: 100%; }
+}
+
+/* Kelas buat ngilangin splash */
+.fade-out {
+    opacity: 0;
+    visibility: hidden;
+}
+
+/* Style Kompas Clean */
+.compass-container {
+    position: relative;
+    width: 220px;
+    height: 220px;
+    margin: 30px auto;
+    border-radius: 50%;
+    border: 2px solid rgba(180, 255, 57, 0.2);
+    background: rgba(255, 255, 255, 0.03);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.compass-ring {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    border-radius: 50%;
+    transition: transform 0.1s linear;
+}
+
+.compass-ring::before {
+    content: 'N';
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-weight: 900;
+    color: #ff4757;
+}
+
+.kaaba-pointer {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 6px;
+    height: 90px;
+    background: #B4FF39;
+    transform-origin: bottom center;
+    transform: translate(-50%, -100%) rotate(0deg);
+    border-radius: 50px 50px 0 0;
+    box-shadow: 0 0 20px rgba(180, 255, 57, 0.6);
+    z-index: 10;
+}
+
+.kaaba-pointer::after {
+    content: 'KIBLAT';
+    position: absolute;
+    top: -35px; /* Jarak pas di atas ujung jarum */
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 1.5rem;
+}
+
+#qibla-degree {
+    font-size: 1.5rem; /* Gue gedein dikit biar kebaca jelas */
+    font-weight: 800;
+    color: #B4FF39;
+    margin-top: 15px;
+}
+
+ .custom-select {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 50px;
+    padding: 10px 15px;
+    color: white;
+    font-size: 0.8rem;
+    outline: none;
+    appearance: none; /* Hilangkan panah default browser */
+    text-align: center;
+}
+.custom-select option {
+    background: #141517; /* Warna menu dropdown biar gelap matching */
+    color: white;
+}
+    * { 
+    margin: 0; 
+    padding: 0; 
+    box-sizing: border-box; 
+    font-family: 'Montserrat', sans-serif; 
+    -webkit-user-select: none; 
+    user-select: none; 
+
+    /* TAMBAHKAN INI */
+    -webkit-user-drag: none;
+    user-drag: none;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: none; /* Mengunci scroll agar tidak goyang saat di-drag */
+}
+
+/* Pastikan input date masih bisa diklik/interaksi */
+#date-search-input {
+    touch-action: auto !important;
+}
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Montserrat', sans-serif; -webkit-user-select: none; user-select: none; }
+        body { height: 100vh; display: flex; align-items: flex-start; justify-content: center; background: #DDE2EC; overflow: hidden; position: relative; padding-top: 40px; }
+        body::before { content: ''; position: fixed; top: 25%; left: 20%; width: 60%; height: 50%; background: linear-gradient(135deg, #A1A9C1 0%, #B6BECF 100%); border-radius: 50%; filter: blur(80px); z-index: -1; opacity: 0.6; }
+
+        .glass-card { background: #141517; border-radius: 35px; border: 1px solid rgba(255, 255, 255, 0.05); padding: 35px 30px 20px 30px; width: 90%; max-width: 380px; color: white; box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2); text-align: center; position: relative; overflow: hidden; }
+        
+        .page { display: none; animation: fadeIn 0.4s ease; }
+        .page.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+      /* CSS untuk membungkus kapsulnya */
+.top-menu-bar { 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    margin-bottom: 25px; 
+    background: #B4FF39; 
+    padding: 10px 20px; 
+    border-radius: 50px;
+    color: #000;
+}
+
+/* CSS ini bakal bikin font "Anam x Reno" DAN "Jam" jadi kembar ukurannya */
+.role-text, #digital-clock { 
+    font-size: 0.65rem; /* Ukuran sama persis */
+    font-weight: 500;    /* Ketebalan sama */
+    opacity: 1 !important;
+    font-family: 'Montserrat', sans-serif;
+}
+
+
+        .nav-container { display: flex; gap: 10px; justify-content: center; margin-bottom: 25px; }
+        .btn-nav { background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.05); padding: 12px; border-radius: 18px; color: white; font-weight: 600; cursor: pointer; font-size: 0.75rem; flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.3s; }
+        .btn-nav.active { background: rgba(255, 255, 255, 0.15); border: 1px solid rgba(255, 255, 255, 0.1); }
+
+        .search-box { margin-bottom: 20px; }
+        #date-search-input { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 50px; padding: 10px 15px; color: white; font-size: 0.8rem; width: 100%; text-align: center; outline: none; }
+
+        .date-pill-box { display: inline-flex; align-items: center; background: rgba(255, 255, 255, 0.12); padding: 10px 25px; border-radius: 50px; font-weight: 700; font-size: 1rem; margin-bottom: 15px; }
+        #txt-hari-besar { font-size: 4rem; font-weight: 800; margin-bottom: 5px; letter-spacing: -2px; }
+        
+        /* PENANGGALAN JAWA STYLE */
+        #txt-jawa-val { font-size: 0.9rem; font-weight: 600; color: #B4FF39; margin-bottom: 20px; opacity: 0.9; }
+
+        .hijrah-info { font-size: 0.9rem; margin-bottom: 30px; opacity: 0.6; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 15px; }
+        
+.glass-card { 
+    background: #141517; 
+    border-radius: 35px; 
+    padding: 35px 25px 20px 25px; /* Padding samping kita set 25px */
+    width: 90%; 
+    max-width: 380px; 
+    overflow: hidden; 
+    position: relative; 
+}
+
+.green-bottom-area {
+    background: #B4FF39;
+    /* Angka ketiga (margin-bottom) dibikin negatif buat narik box ke bawah */
+    /* Sesuaikan angkanya (misal -15px atau -20px) sampai gapnya simetris */
+    margin: 20px -20px -15px -20px; 
+    
+    border-radius: 28px;
+    padding: 22px 12px;
+}
+
+
+
+        .wheel-labels, .wheel-numbers { display: flex; justify-content: space-between; }
+        .label-day { font-size: 0.65rem; font-weight: 800; color: rgba(0, 0, 0, 0.4); width: 14%; text-transform: uppercase; }
+        .num-day { font-size: 1rem; font-weight: 800; color: #000; width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+  .num-day.active { 
+    background: #000;      /* Background lingkaran putih */
+    color: #B4FF39;       /* Tambahin ini: Warna angka jadi ijo */
+    border-radius: 50%; 
+    transform: scale(0.9); /* Tambahin ini: Biar lingkaran gak kegedean (pilih 1.0 atau 1.1) */
+    font-weight: 900;      /* Opsional: Biar angka ijonya lebih tegas/tebel */
+}
+
+        /* PRAYER */
+        .prayer-list { display: flex; flex-direction: column; gap: 10px; }
+        .prayer-row { background: rgba(255, 255, 255, 0.04); padding: 15px 20px; border-radius: 20px; display: flex; justify-content: space-between; align-items: center; }
+        .p-time { font-weight: 800; color: #B4FF39; }
+    </style>
+</head>
+<body oncontextmenu="return false;">
+
+<div id="splash-screen">
+    <div class="splash-content">
+        <h1 class="splash-logo">ANAM<span> ACH</span></h1>
+        <div class="loading-bar"></div>
+        <p>Programmed by Ach Anam</p>
+    </div>
+</div>
+
+
+    <div class="glass-card">
+    <div class="top-menu-bar">
+    <span class="role-text"> A Prototype Of Ach Anam</span>
+    <span id="digital-clock">--:--</span> </div>
+
+        <div class="nav-container">
+    <div id="btn-cal" class="btn-nav active" onclick="switchPage('calendar')">Kalender</div>
+    <div id="btn-kiblat" class="btn-nav" onclick="switchPage('kiblat')">Kiblat</div>
+    <div id="btn-prayer" class="btn-nav" onclick="switchPage('prayer')">Sholat</div>
+</div>
+
+        <div id="calendar-page" class="page active">
+            <div class="search-group" style="display: flex; gap: 8px; margin-bottom: 20px;">
+    <select id="month-select" class="custom-select" style="flex: 2;">
+        <option value="0">Januari</option>
+        <option value="1">Februari</option>
+        <option value="2">Maret</option>
+        <option value="3">April</option>
+        <option value="4">Mei</option>
+        <option value="5">Juni</option>
+        <option value="6">Juli</option>
+        <option value="7">Agustus</option>
+        <option value="8">September</option>
+        <option value="9">Oktober</option>
+        <option value="10">November</option>
+        <option value="11">Desember</option>
+    </select>
+
+    <select id="date-select" class="custom-select" style="flex: 1;">
+        </select>
+</div>
+            <div class="date-pill-box"><span id="txt-kotak-atas">...</span></div>
+
+<div class="main-display">
+    <p id="holiday-text" style="color: #FF4444; font-size: 0.8rem; font-weight: bold; margin-bottom: 5px; display: none;"></p>
+    
+    <div id="txt-hari-besar">...</div>
+    
+    <div id="txt-jawa-val" style="margin-bottom: 5px;">...</div>
+
+    <div id="jawa-detail" style="font-size: 0.65rem; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 20px;">
+        <span id="txt-wuku">Wuku: -</span> | 
+        <span id="txt-warsa">Warsa: -</span> | 
+        <span id="txt-neptu">Neptu: -</span>
+    </div>
+</div>
+
+<div class="hijrah-info"><span id="txt-hijri-val">-</span></div>
+
+            <div class="green-bottom-area">
+                <div class="wheel-labels" id="wheel-names"></div>
+                <div class="wheel-numbers" id="wheel-nums"></div>
+            </div>
+        </div>
+        <div id="kiblat-page" class="page">
+    <div style="text-align: left; margin-bottom: 10px;">
+        <h2 style="font-size: 1.4rem; font-weight: 800;">Arah Kiblat</h2>
+        <p id="kiblat-status" style="font-size: 0.7rem; opacity: 0.4;">Mendeteksi sensor...</p>
+    </div>
+    
+    <div class="compass-container">
+        <div id="compass-ring" class="compass-ring"></div>
+        <div id="pointer" class="kaaba-pointer"></div>
+    </div>
+    
+    <div id="qibla-degree">��</div>
+    <p style="text-align: center; font-size: 0.65rem; opacity: 0.5; margin-top: 5px;">Arahkan ke Kiblat</p>
+</div>
+            
+        
+
+        <div id="prayer-page" class="page">
+            <div style="text-align: left; margin-bottom: 20px;">
+                <h2 style="font-size: 1.4rem; font-weight: 800;">Waktu Sholat</h2>
+                <p id="location-text" style="font-size: 0.7rem; opacity: 0.4;">Detecting your location...</p>
+            </div>
+            <div class="prayer-list">
+                <div class="prayer-row"><span>Subuh</span><span class="p-time" id="fajr">—</span></div>
+                <div class="prayer-row"><span>Dzuhur</span><span class="p-time" id="dhuhr">—</span></div>
+                <div class="prayer-row"><span>Ashar</span><span class="p-time" id="asr">—</span></div>
+                <div class="prayer-row"><span>Maghrib</span><span class="p-time" id="maghrib">—</span></div>
+                <div class="prayer-row"><span>Isya</span><span class="p-time" id="isha">—</span></div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let baseDate = new Date();
+let selectedDate = new Date();
+let daftarLibur = {}; // Tempat nampung data dari API/Cache
+
+async function fetchLibur(tahun) {
+    // 1. Data Cadangan (Hardcoded) buat 2026 biar PASTI MERAH
+    const backupLibur2026 = {
+        "2026-01-01": "Tahun Baru 2026 Masehi",
+        "2026-02-17": "Isra Mikraj Nabi Muhammad SAW",
+        "2026-03-20": "Hari Suci Nyepi (Tahun Baru Saka 1948)",
+        "2026-03-20": "Idul Fitri 1447 Hijriah",
+        "2026-03-21": "Idul Fitri 1447 Hijriah",
+        "2026-04-03": "Wafat Yesus Kristus",
+        "2026-05-01": "Hari Buruh Internasional",
+        "2026-05-14": "Kenaikan Yesus Kristus", // INI YANG LO CARI
+        "2026-05-27": "Hari Raya Idul Adha",
+        "2026-06-01": "Hari Lahir Pancasila",
+        "2026-08-17": "Hari Kemerdekaan RI",
+        "2026-12-25": "Hari Raya Natal"
+    };
+
+    try {
+        const response = await fetch(`https://dayoffapi.vercel.app/api?year=${tahun}`);
+        if (!response.ok) throw new Error('API Down');
+        
+        const data = await response.json();
+        let tempLibur = {};
+        data.forEach(item => {
+            const cleanDate = item.tanggal.split('T')[0]; 
+            tempLibur[cleanDate] = item.keterangan;
+        });
+        daftarLibur = tempLibur;
+    } catch (err) {
+        console.log("Pake data cadangan karena API error");
+        // Kalau gagal/offline, pake data backup (khusus 2026)
+        daftarLibur = (tahun == 2026) ? backupLibur2026 : {};
+    }
+    
+    updateUI(selectedDate);
+}
+// Panggil fungsi ini supaya mesinnya jalan pas aplikasi dibuka
+fetchLibur(new Date().getFullYear());
+
+
+
+        // 1. MESIN HITUNG JAWA LENGKAP (PENGGANTI getPasaranJawa)
+        function getDataJawaLengkap(target) {
+            const pasaranArr = ["Legi", "Pahing", "Pon", "Wage", "Kliwon"];
+            const nHari = [5, 4, 3, 7, 8, 6, 9]; // Nilai hari (Minggu-Sabtu)
+            const nPasaran = [5, 9, 7, 4, 8];    // Nilai pasaran (Legi-Kliwon)
+            const daftarWuku = [
+                "Sinta", "Landep", "Wukir", "Kurantil", "Tolu", "Gumbreg", "Warigalit", "Warigagung",
+                "Juliwangi", "Sungsang", "Galungan", "Kuningan", "Langkir", "Mandihiya", "Prangbakat",
+                "Bala", "Wugu", "Wayang", "Kulawu", "Dukut", "Watugunung"
+            ];
+            const daftarWarsa = ["Alip", "Ehe", "Jimawal", "Je", "Dal", "Be", "Wawu", "Jimakir"];
+
+            const refDate = new Date(1900, 0, 1);
+            const diffDays = Math.floor((target - refDate) / (1000 * 60 * 60 * 24));
+            
+            // Pasaran & Neptu
+            const pIdx = (diffDays + 1) % 5;
+            const pFinal = pasaranArr[pIdx < 0 ? pIdx + 5 : pIdx];
+            const neptuTotal = nHari[target.getDay()] + nPasaran[pIdx < 0 ? pIdx + 5 : pIdx];
+            
+            // Wuku (Siklus 210 hari)
+            const refWuku = new Date(2023, 0, 1); 
+            const diffWuku = Math.floor((target - refWuku) / (1000 * 60 * 60 * 24));
+            const wukuIdx = Math.floor(diffWuku / 7) % 30;
+            const wukuFinal = daftarWuku[wukuIdx < 0 ? wukuIdx + 30 : (wukuIdx >= 30 ? wukuIdx % 30 : wukuIdx)] || "Sinta";
+
+                        // Warsa (Tahun Jawa) - Di-offset ke 2026 agar muncul "Ehe"
+            const warsaIdx = (target.getFullYear() - 2026 + 1) % 8;
+            const warsaFinal = daftarWarsa[warsaIdx < 0 ? warsaIdx + 8 : warsaIdx];
+
+
+            return { pasaran: pFinal, neptu: neptuTotal, wuku: wukuFinal, warsa: warsaFinal };
+        }
+
+        // 2. NAVIGASI HALAMAN
+        function switchPage(p) {
+            document.querySelectorAll('.page').forEach(pg => pg.classList.remove('active'));
+            document.querySelectorAll('.btn-nav').forEach(bn => bn.classList.remove('active'));
+            
+            if(p === 'calendar') {
+                document.getElementById('calendar-page').classList.add('active');
+                document.getElementById('btn-cal').classList.add('active');
+            } else if(p === 'kiblat') {
+                document.getElementById('kiblat-page').classList.add('active');
+                document.getElementById('btn-kiblat').classList.add('active');
+                initCompass();
+            } else {
+                document.getElementById('prayer-page').classList.add('active');
+                document.getElementById('btn-prayer').classList.add('active');
+                updatePrayerTimes();
+            }
+        }
+                // --- MESIN KOMPAS & KIBLAT ---
+        function initCompass() {
+            const ring = document.getElementById('compass-ring');
+            const degreeTxt = document.getElementById('qibla-degree');
+            const status = document.getElementById('kiblat-status');
+
+            if (window.DeviceOrientationEvent) {
+                window.addEventListener('deviceorientation', (e) => {
+                    // Ambil arah utara (heading)
+                    let heading = e.webkitCompassHeading || (360 - e.alpha);
+                    
+                    if (heading) {
+                        // Putar piringan derajatnya
+                        ring.style.transform = `rotate(${-heading}deg)`;
+                        // Update angka di layar
+                        degreeTxt.innerText = `${Math.round(heading)}°`;
+                        status.innerText = "Sensor Kompas Aktif";
+                    }
+                }, true);
+            } else {
+                status.innerText = "Sensor tidak didukung";
+            }
+        }
+
+
+        // 3. KONVERSI HIJRIAH
+        function gToH(d, m, y) {
+            if (m < 3) { y -= 1; m += 12; }
+            let a = Math.floor(y / 100);
+            let b = 2 - a + Math.floor(a / 4);
+            let jd = Math.floor(365.25 * (y + 4716)) + Math.floor(30.6001 * (m + 1)) + d + b - 1524;
+            let l = jd - 1948440 + 10632;
+            let n = Math.floor((l - 1) / 10631);
+            l = l - 10631 * n + 354;
+            let j = (Math.floor((10985 - l) / 5316)) * (Math.floor((50 * l) / 17719)) + (Math.floor(l / 5670)) * (Math.floor((43 * l) / 15238));
+            l = l - (Math.floor((30 - j) / 15)) * (Math.floor((17719 * j) / 50)) - (Math.floor(j / 16)) * (Math.floor((15238 * j) / 43)) + 29;
+            let month = Math.floor((24 * l) / 709);
+            let day = l - Math.floor((709 * month) / 24);
+            let year = 30 * n + j - 30;
+            return { d: day, m: month, y: year };
+        }
+
+        // 4. UPDATE TAMPILAN (UI)
+        function updateUI(target) {
+    const bln = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+    const hr = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+    const blnH = ["Muharram", "Safar", "Rabiul Awal", "Rabiul Akhir", "Jumadil Awal", "Jumadil Akhir", "Rajab", "Sya'ban", "Ramadhan", "Syawal", "Dzulqo'dah", "Dzulhijjah"];
+    
+    const yKey = target.getFullYear();
+    const mKey = String(target.getMonth() + 1).padStart(2, '0');
+    const dKey = String(target.getDate()).padStart(2, '0');
+    const key = `${yKey}-${mKey}-${dKey}`; 
+    
+    const holidayName = daftarLibur[key];
+
+    const elJam = document.getElementById('digital-clock');
+    if(elJam) elJam.innerText = new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+    
+    document.getElementById('txt-kotak-atas').innerText = `${bln[target.getMonth()]} ${target.getDate()}`;
+    
+    const elHoliday = document.getElementById('holiday-text');
+    const elDayName = document.getElementById('txt-hari-besar');
+    
+    if (holidayName) {
+        elHoliday.innerText = holidayName;
+        elHoliday.style.display = 'block';
+        elDayName.style.color = '#FF4444'; 
+    } else {
+        elHoliday.style.display = 'none';
+        elDayName.style.color = (target.getDay() === 0) ? '#FF4444' : 'white'; 
+    }
+    elDayName.innerText = hr[target.getDay()];
+    
+    const dj = getDataJawaLengkap(target);
+    document.getElementById('txt-jawa-val').innerText = dj.pasaran;
+    document.getElementById('txt-wuku').innerText = `Wuku: ${dj.wuku}`;
+    document.getElementById('txt-warsa').innerText = `Warsa: ${dj.warsa}`;
+    document.getElementById('txt-neptu').innerText = `Neptu: ${dj.neptu}`;
+
+    const h = gToH(target.getDate(), target.getMonth() + 1, target.getFullYear());
+    document.getElementById('txt-hijri-val').innerText = `Hijrah: ${h.d} ${blnH[h.m - 1]} ${h.y} H`;
+
+    const nC = document.getElementById('wheel-names');
+    const uC = document.getElementById('wheel-nums'); // FIX DISINI (wheel-nums)
+    
+    if(nC && uC) {
+        nC.innerHTML = ''; uC.innerHTML = '';
+        for (let i = -3; i <= 3; i++) {
+            let d = new Date(baseDate); 
+            d.setDate(baseDate.getDate() + i);
+            
+            const wheelKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+
+            let sn = document.createElement('span'); 
+            sn.className = 'label-day'; 
+            sn.innerText = ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"][d.getDay()];
+            
+            let su = document.createElement('span'); 
+            su.className = 'num-day'; 
+            su.innerText = d.getDate();
+            
+            if (d.getDay() === 0 || (daftarLibur && daftarLibur[wheelKey])) {
+                su.style.color = '#FF4444';
+            }
+
+            if(d.toDateString() === target.toDateString()) su.classList.add('active');
+            
+            su.onclick = () => { 
+                selectedDate = new Date(d); 
+                updateUI(selectedDate); 
+            };
+            nC.appendChild(sn); 
+            uC.appendChild(su);
+        }
+    }
+}
+
+async function updatePrayerTimes() {
+    const defaultLat = -7.7067; 
+    const defaultLon = 114.0051;
+    const now = new Date();
+    const month = now.getMonth() + 1;
+    const year = now.getFullYear();
+    const todayStr = `${String(now.getDate()).padStart(2, '0')}-${String(month).padStart(2, '0')}-${year}`;
+
+    const fetchData = async (lat, lon, label) => {
+        try {
+            const res = await fetch(`https://api.aladhan.com/v1/calendar?latitude=${lat}&longitude=${lon}&method=20&month=${month}&year=${year}`);
+            const d = await res.json();
+            
+            localStorage.setItem('monthly_prayers', JSON.stringify(d.data));
+            localStorage.setItem('prayer_label', label);
+            localStorage.setItem('last_lat', lat);
+            localStorage.setItem('last_lon', lon);
+            
+            displayTodayTime(d.data, todayStr, label);
+        } catch (err) {
+            loadOfflineData(todayStr);
+        }
+    };
+
+    function loadOfflineData(dateStr) {
+        const savedData = JSON.parse(localStorage.getItem('monthly_prayers'));
+        const savedLabel = localStorage.getItem('prayer_label') || "Mode Offline";
+        if (savedData) {
+            displayTodayTime(savedData, dateStr, savedLabel + " (Offline)");
+        } else {
+            document.getElementById('location-text').innerText = "Butuh internet sekali untuk sinkron sebulan.";
+        }
+    }
+
+    function displayTodayTime(monthlyData, dateStr, label) {
+        const dayData = monthlyData.find(item => item.date.gregorian.date === dateStr);
+        if (dayData) {
+            const t = dayData.timings;
+            document.getElementById('location-text').innerText = label;
+            document.getElementById('fajr').innerText = t.Fajr.split(' ')[0];
+            document.getElementById('dhuhr').innerText = t.Dhuhr.split(' ')[0];
+            document.getElementById('asr').innerText = t.Asr.split(' ')[0];
+            document.getElementById('maghrib').innerText = t.Maghrib.split(' ')[0];
+            document.getElementById('isha').innerText = t.Isha.split(' ')[0];
+        }
+    }
+
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            (p) => {
+                const currentLat = p.coords.latitude;
+                const currentLon = p.coords.longitude;
+                const savedData = JSON.parse(localStorage.getItem('monthly_prayers'));
+                const savedLat = localStorage.getItem('last_lat');
+                const savedLon = localStorage.getItem('last_lon');
+
+                if (savedData && savedLat && savedLon) {
+                    const firstDate = savedData[0].date.gregorian;
+                    const isSameMonth = parseInt(firstDate.month.number) === month && parseInt(firstDate.year) === year;
+                    const isNear = Math.abs(currentLat - parseFloat(savedLat)) < 0.1 && Math.abs(currentLon - parseFloat(savedLon)) < 0.1;
+
+                    if (isSameMonth && isNear) {
+                        displayTodayTime(savedData, todayStr, localStorage.getItem('prayer_label') || "Lokasi Aktif");
+                        return; 
+                    }
+                }
+                fetchData(currentLat, currentLon, "Lokasi Aktif");
+            },
+            () => fetchData(defaultLat, defaultLon, "Situbondo"),
+            { timeout: 5000 }
+        );
+    } else {
+        fetchData(defaultLat, defaultLon, "Situbondo");
+    }
+}
+
+// SAMPE SINI
+    // Panggilan awal aplikasi
+    updateUI(selectedDate);
+    
+      
+
+        const monthSel = document.getElementById('month-select');
+const dateSel = document.getElementById('date-select');
+
+// Fungsi mengisi tanggal berdasarkan bulan
+function syncDropdowns() {
+    const month = parseInt(monthSel.value);
+    const year = selectedDate.getFullYear();
+    const lastDay = new Date(year, month + 1, 0).getDate();
+
+    const currentVal = dateSel.value;
+    dateSel.innerHTML = ''; 
+    
+    for (let i = 1; i <= lastDay; i++) {
+        const opt = document.createElement('option');
+        opt.value = i;
+        opt.innerHTML = i;
+        dateSel.appendChild(opt);
+    }
+    
+    if(currentVal && currentVal <= lastDay) {
+        dateSel.value = currentVal;
+    } else {
+        dateSel.value = 1;
+    }
+}
+
+// Fungsi saat user memilih bulan/tanggal
+function applySelection() {
+    const y = new Date().getFullYear();
+    const m = parseInt(monthSel.value);
+    const d = parseInt(dateSel.value) || 1;
+    
+    selectedDate = new Date(y, m, d);
+    baseDate = new Date(selectedDate); // Biar barisan angka di bawah (wheel) ikut geser
+    updateUI(selectedDate);
+}
+
+monthSel.addEventListener('change', () => {
+    syncDropdowns();
+    applySelection();
+});
+
+dateSel.addEventListener('change', applySelection);
+
+// --- BAGIAN AKHIR SCRIPT ---
+
+// Inisialisasi awal agar dropdown terisi saat aplikasi dibuka
+syncDropdowns();
+monthSel.value = selectedDate.getMonth();
+dateSel.value = selectedDate.getDate();
+
+// Panggil fungsi utama biar data langsung muncul
+updateUI(selectedDate);
+updatePrayerTimes(); 
+
+// Proteksi UI biar berasa kayak Native App
+document.addEventListener('contextmenu', event => event.preventDefault());
+document.addEventListener('dragstart', (e) => e.preventDefault(), false);
+
+// Fungsi pembantu buat kompas
+function degToRad(deg) { return deg * (Math.PI / 180); }
+
+// Fungsi buat ngilangin Splash Screen setelah 2.5 detik
+window.addEventListener('load', () => {
+    setTimeout(() => {
+        const splash = document.getElementById('splash-screen');
+        splash.classList.add('fade-out');
+    }, 3000); // 2500ms = 2.5 detik
+});
+// Jam Real-Time yang lebih aman
+setInterval(() => {
+    const elJam = document.getElementById('digital-clock');
+    if (elJam) {
+        elJam.innerText = new Date().toLocaleTimeString('en-US', { 
+            hour: 'numeric', 
+            minute: '2-digit', 
+            hour12: true 
+        });
+    }
+}, 1000);
+
+</script>
+
+</body>
+</html>
